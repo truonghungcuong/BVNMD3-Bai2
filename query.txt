@@ -1,0 +1,81 @@
+create database student_management1;
+use student_management1;
+create table students(
+    id int auto_increment primary key ,
+    name varchar(50) not null,
+    address varchar(50) not null,
+    sex bit default 1 not null,
+    age int not null check ( age between 18 and 25),
+    email varchar(50) not null unique,
+    phone varchar(10) not null
+);
+create table classes(
+    id int auto_increment primary key ,
+    name varchar(50) not null unique
+);
+alter table students add classid int not null;
+alter table students add foreign key (classid)references classes(id);
+insert into classes(name)
+value ('A1'),
+    ('A2'),
+    ('A3'),
+    ('A4'),
+    ('A5');
+insert into students(id,name, address, sex, age, email, phone,classid)
+value (1,'Cường','TB',1,21,'cuong@gmail.com',12345,2),
+    (2,'Đức','TB',1,21,'duc13@gmail.com',123456,2),
+    (3,'Việt','HN',1,18,'viet14@gmail.com',1234567,3),
+    (4,'Hoài','TB',0,18,'hoai15@gmail.com',12345678,4),
+    (5,'Phương','HN',0,19,'phuong16@gmail.com',123456789,3),
+    (6,'Thu','TB',0,19,'thu17@gmail.com',112345,1),
+    (7,'Thảo','HCM',0,20,'thao18@gmail.com',1123456,2),
+    (8,'Hiếu','TB',1,20,'hieu19@gmail.com',11234567,3),
+    (9,'Phước','HCM',1,21,'phuoc20@gmail.com',112345678,4),
+    (10,'Hiền','TB',0,21,'hien21@gmail.com',1123456789,5);
+select *from students;
+#Danh sách học viên theo tên giảm dần
+select *from students order by name desc ;
+#Danh sách học viên theo tuổi tăng dần
+select *from students order by age;
+#Tổng số lượng học viên của mỗi lớp
+select s.classid,c.name, count(s.classid) from students s join classes c on s.classid=c.id group by s.classid, c.name;
+#Lớp có số lượng học viên là đông nhất
+select s.classid,c.name, count(s.classid) as totalstudent from students s join classes c on s.classid=c.id
+group by s.classid, c.name
+having totalstudent >= all(select count(classid) from students group by students.classid);
+#lớp có số lượng học viên là ít nhất
+select s.classid,c.name, count(s.classid) as totalstudent from students s join classes c on s.classid = c.id
+group by s.classid, c.name
+having totalstudent <= all(select count(classid) from students group by students.classid);
+#Số lượng học viên theo địa chỉ
+select address, count(address) from students
+group by address;
+#Những lớp có số lượng học viên lớn hơn 2
+select s.classid,c.name, count(s.classid) as totalstudent from students s join classes c on s.classid=c.id
+group by s.classid, c.name
+having totalstudent >2;
+#Những thành phố có số lượng học viên lớn hơn 2
+select address, count(address) as totalstudent from students
+group by address
+having totalstudent >2;
+#Hiển thị học viên có tuổi lớn nhất
+select name,max(age) as maxage from students
+group by name
+having maxage=(select max(age) from students);
+#Hiển thị học viên có tuổi nhỏ nhất
+select name,min(age) as maxage from students
+group by name
+having maxage=(select min(age) from students);
+#Xóa tất cả học viên có quê ở HN
+delete from students
+where address='HN';
+#Cập nhật thông tin của học viên có quê ở Hà Nội thành giới tính nữ
+update students
+set sex=0
+where address='HN';
+#Hiển thị học viên có số tuổi lớn thứ hai
+select*from students where age=(select max(age) from students
+where age<(select max(age) from students));
+#Hiển thị học viên có số tuổi nhỏ thứ hai
+select*from students where age=(select min(age) from students
+                                where age>(select min(age) from students));
